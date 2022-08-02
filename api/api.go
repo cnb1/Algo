@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-func GetPrice(start time.Time, wg *sync.WaitGroup) {
+func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan string) {
 	fmt.Println("getting prices...")
-	end := start.Add(8 * time.Second)
+	end := start.Add(1 * time.Hour)
 
 	for {
 		time.Sleep(2 * time.Second)
@@ -32,6 +32,6 @@ func GetPrice(start time.Time, wg *sync.WaitGroup) {
 		}
 		//Convert the body to type string
 		sb := string(body)
-		log.Printf(sb)
+		ch <- sb
 	}
 }

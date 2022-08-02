@@ -6,13 +6,20 @@ import (
 	"time"
 )
 
-func Ma15(start time.Time, wg *sync.WaitGroup) {
+func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan string) {
 	fmt.Println("ma15 execute")
-	wg.Done()
+	end := start.Add(1 * time.Hour)
 
-	// create e algo that calculates the 1 min and 5 min MAs
-	// makes trades on these
-	// when 1 goes below 5 then sell
-	// when 1 crosses 5 then buy
-	// create a chanel to communicate in bewtwwn
+	for {
+		if time.Now().After(end) {
+			fmt.Println("time to cancel ma15")
+			wg.Done()
+		}
+		val := <-ch
+
+		fmt.Println("ma15 printing the price...")
+		fmt.Println(val)
+
+	}
+
 }
