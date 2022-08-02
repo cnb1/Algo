@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,7 +10,15 @@ import (
 	"time"
 )
 
-func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan string) {
+type Price struct {
+	Usd int `json:"usd"`
+}
+
+type Result struct {
+	Crypto Price `json:"bitcoin"`
+}
+
+func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan int) {
 	fmt.Println("getting prices...")
 	end := start.Add(1 * time.Hour)
 
@@ -30,8 +39,10 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan string) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		//Convert the body to type string
-		sb := string(body)
-		ch <- sb
+
+		var result Result
+		json.Unmarshal(body, &result)
+
+		ch <- result.Crypto.Usd
 	}
 }
