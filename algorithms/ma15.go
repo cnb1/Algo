@@ -36,7 +36,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan int) {
 			fmt.Println("date: ", item.date, " price: ", item.price)
 		}
 
-		checkInterval(*l, 4, wg)
+		checkInterval(l, 4, wg)
 
 		fmt.Println("--------------after-----------------------")
 		for e := l.Front(); e != nil; e = e.Next() {
@@ -48,7 +48,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan int) {
 
 }
 
-func checkInterval(l list.List, interval int, wg *sync.WaitGroup) {
+func checkInterval(l *list.List, interval int, wg *sync.WaitGroup) {
 	var start time.Time = time.Now().Add(-time.Second * time.Duration(interval))
 	fmt.Println("start: ", start)
 	fmt.Println()
