@@ -18,12 +18,12 @@ type Result struct {
 	Crypto Price `json:"bitcoin"`
 }
 
-func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan int) {
+func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64) {
 	fmt.Println("getting prices...")
 	end := start.Add(1 * time.Hour)
 
 	for {
-		time.Sleep(2 * time.Second)
+		time.Sleep(4 * time.Second)
 
 		if time.Now().After(end) {
 			fmt.Println("time to cacnel")
@@ -31,18 +31,25 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan int) {
 		}
 
 		resp, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
+
 		if err != nil {
 			log.Fatalln(err)
+			fmt.Println("request error")
+			time.Sleep(60 * time.Second)
+			continue
 		}
 		//We Read the response body on the line below.
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatalln(err)
+			fmt.Println("request error")
+			time.Sleep(60 * time.Second)
+			continue
 		}
 
 		var result Result
 		json.Unmarshal(body, &result)
 
-		ch <- result.Crypto.Usd
+		ch <- (float64(result.Crypto.Usd))
 	}
 }

@@ -14,7 +14,7 @@ func main() {
 	wg.Add(2)
 
 	//channel
-	chn := make(chan int)
+	chn := make(chan float64)
 
 	start := time.Now()
 
