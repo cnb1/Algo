@@ -18,13 +18,17 @@ type Average struct {
 	total float64
 }
 
-const intervalsmall = 60
-const intervallarge = 300
+const intervalsmall = 10 //60
+const intervallarge = 30 //300
 const runningTimeMin = 5
 
 var money = 1000000
 
 func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
+	// Gets the end value that the back value needs to be greater than
+	t1 := start.Add(time.Second * intervallarge)
+	ifCanTrade := false
+
 	fmt.Println("ma15 execute")
 	end := start.Add(runningTimeMin * time.Hour)
 	l := list.New()
@@ -70,18 +74,32 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 		fmt.Println()
 		fmt.Println()
 
-		/*
-			when the large time has finally passed then we need to mark the current position
-			after this is set to true then we can start with the small to large and large to small
-			occurances which i have already detailed in the notes
+		// check if the end value in lLarge is after the t1 value
+		if !ifCanTrade && lLarge.Back().Value.(Price).date.After(t1) {
+			fmt.Println("IT IS AFTER")
+			ifCanTrade = true
+		}
 
-			small < large then short it then wait until 1% price down and close it or close it when
-				the price is >= the initial price bought after a change
+		if ifCanTrade {
+			/*
+				if a position is being taken then set a position and a price and
+				dont take a new one unless the actual price is at break even from start
+			*/
+			// you can check the averages now small and large
+			fmt.Println("CHECK THE AVERAGES")
 
-			small > large then only buy until price is 1% above the position price then sell it or
-				sell it when the price is <= the initial price after a price change has occured
+			if avg.avg > avgLarge.avg {
+				// bullish
+				fmt.Println("buy bitcoin")
+			} else if avg.avg < avgLarge.avg {
+				// bearish
+				fmt.Println("short bitcoin")
+			} else {
+				// do nothing
+				fmt.Println("dont buy anything")
+			}
+		}
 
-		*/
 	}
 
 }
