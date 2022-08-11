@@ -54,7 +54,11 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 		avgLarge.avg = avgLarge.sum / avgLarge.total
 
 		fmt.Println("-----------------------------")
-		fmt.Println("New Price ", price.price, " -> average: ", avg.avg, " total: ", avg.total, " sum: ", avg.sum)
+		fmt.Println("small : New Price ", price.price, " -> average: ", avg.avg, " total: ", avg.total, " sum: ", avg.sum)
+		fmt.Println("large : New Price ", price.price, " -> average: ", avgLarge.avg, " total: ", avgLarge.total, " sum: ", avgLarge.sum)
+		fmt.Println()
+		fmt.Println()
+
 		l.PushBack(price)
 		lLarge.PushBack(price)
 
@@ -63,8 +67,21 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 		fmt.Println("Average is now: ", avg.avg)
 		fmt.Println("Average Large is now: ", avgLarge.avg)
 		fmt.Println("-----------------------------")
+		fmt.Println()
+		fmt.Println()
 
-		// now is the time to decide whether or not to buy or sell
+		/*
+			when the large time has finally passed then we need to mark the current position
+			after this is set to true then we can start with the small to large and large to small
+			occurances which i have already detailed in the notes
+
+			small < large then short it then wait until 1% price down and close it or close it when
+				the price is >= the initial price bought after a change
+
+			small > large then only buy until price is 1% above the position price then sell it or
+				sell it when the price is <= the initial price after a price change has occured
+
+		*/
 	}
 
 }
@@ -78,8 +95,8 @@ func checkInterval(l *list.List, lLarge *list.List, intervalsmall int, intervall
 
 		if item.date.Before(start) {
 
-			fmt.Println("its before")
-			fmt.Println("average: ", avg.avg, " total: ", avg.total, " sum: ", avg.sum)
+			fmt.Println("	small its before")
+			fmt.Println("	average: ", avg.avg, " total: ", avg.total, " sum: ", avg.sum)
 			fmt.Println()
 			avg.total--
 			avg.sum = avg.sum - item.price
@@ -97,8 +114,8 @@ func checkInterval(l *list.List, lLarge *list.List, intervalsmall int, intervall
 
 		if item.date.Before(startLarge) {
 
-			fmt.Println("its before")
-			fmt.Println("average large: ", avgLarge.avg, " total: ", avgLarge.total, " sum: ", avgLarge.sum)
+			fmt.Println("	large its before")
+			fmt.Println("	average large: ", avgLarge.avg, " total: ", avgLarge.total, " sum: ", avgLarge.sum)
 			fmt.Println()
 			avgLarge.total--
 			avgLarge.sum = avgLarge.sum - item.price
