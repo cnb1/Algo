@@ -18,19 +18,28 @@ type Average struct {
 	total float64
 }
 
+type Position struct {
+	buy        float64
+	close      float64
+	position   string
+	inPosition bool
+	newPrice   bool
+}
+
 const intervalsmall = 10 //60
 const intervallarge = 30 //300
 const runningTimeMin = 5
 
-var money = 1000000
+var money float64 = 1000000
 
 func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 	// Gets the end value that the back value needs to be greater than
 	t1 := start.Add(time.Second * intervallarge)
 	ifCanTrade := false
+	position := Position{buy: 0, close: 0, inPosition: false, newPrice: false}
 
 	fmt.Println("ma15 execute")
-	end := start.Add(runningTimeMin * time.Hour)
+	end := start.Add(runningTimeMin * time.Minute)
 	l := list.New()
 	lLarge := list.New()
 
@@ -49,6 +58,13 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 		price.price = val
 		price.date = time.Now()
 
+		// check if change in price
+		if position.inPosition && position.buy != price.price {
+			fmt.Println("[there is a new price]")
+			position.newPrice = true
+		}
+
+		// start averages
 		avg.sum = avg.sum + price.price
 		avg.total++
 		avg.avg = avg.sum / avg.total
@@ -57,22 +73,10 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 		avgLarge.total++
 		avgLarge.avg = avgLarge.sum / avgLarge.total
 
-		fmt.Println("-----------------------------")
-		fmt.Println("small : New Price ", price.price, " -> average: ", avg.avg, " total: ", avg.total, " sum: ", avg.sum)
-		fmt.Println("large : New Price ", price.price, " -> average: ", avgLarge.avg, " total: ", avgLarge.total, " sum: ", avgLarge.sum)
-		fmt.Println()
-		fmt.Println()
-
 		l.PushBack(price)
 		lLarge.PushBack(price)
 
 		checkInterval(l, lLarge, intervalsmall, intervallarge, wg, &avg, &avgLarge)
-
-		fmt.Println("Average is now: ", avg.avg)
-		fmt.Println("Average Large is now: ", avgLarge.avg)
-		fmt.Println("-----------------------------")
-		fmt.Println()
-		fmt.Println()
 
 		// check if the end value in lLarge is after the t1 value
 		if !ifCanTrade && lLarge.Back().Value.(Price).date.After(t1) {
@@ -81,19 +85,66 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 		}
 
 		if ifCanTrade {
-			/*
-				if a position is being taken then set a position and a price and
-				dont take a new one unless the actual price is at break even from start
-			*/
-			// you can check the averages now small and large
-			fmt.Println("CHECK THE AVERAGES")
 
-			if avg.avg > avgLarge.avg {
+			if position.inPosition {
+				if position.position == "long" && position.newPrice {
+
+					fmt.Println("long and new price")
+					// check if we need to close of a loss or a gain
+					if price.price < position.buy || price.price >= position.close {
+
+						fmt.Print("		closing long position, before money: ", money, " | at price : ", price.price)
+
+						money += (price.price - position.buy)
+
+						position.position = "none"
+						position.inPosition = false
+						position.buy = 0
+						position.close = 0
+						position.newPrice = false
+
+						fmt.Println("		after long money: ", money)
+					}
+
+				} else if position.position == "short" && position.newPrice { // "short"
+					fmt.Println("short and new price")
+					if price.price > position.buy || price.price <= position.close {
+						// close for a loss
+						fmt.Print("		closing short position, before money: ", money, " | at price : ", price.price)
+
+						money += (position.buy - price.price)
+
+						position.position = "none"
+						position.inPosition = false
+						position.buy = 0
+						position.close = 0
+						position.newPrice = false
+
+						fmt.Println("		after short money: ", money)
+					}
+				}
+			} else if avg.avg > avgLarge.avg {
 				// bullish
-				fmt.Println("buy bitcoin")
+				fmt.Println("buy bitcoin | small avg : ", avg.avg, "   large avg : ", avgLarge.avg)
+				position.position = "long"
+				position.buy = price.price
+				position.close = price.price * 1.01
+				position.inPosition = true
+				position.newPrice = false
+
+				fmt.Println("position: ", position.position, " buy at: ", position.buy, " close at ", position.close)
+
 			} else if avg.avg < avgLarge.avg {
 				// bearish
-				fmt.Println("short bitcoin")
+				fmt.Println("short bitcoin | small avg : ", avg.avg, "   large avg : ", avgLarge.avg)
+				position.position = "short"
+				position.buy = price.price
+				position.close = price.price * 0.99
+				position.inPosition = true
+				position.newPrice = false
+
+				fmt.Println("position: ", position.position, " buy at: ", position.buy, " close at ", position.close)
+
 			} else {
 				// do nothing
 				fmt.Println("dont buy anything")
@@ -113,9 +164,6 @@ func checkInterval(l *list.List, lLarge *list.List, intervalsmall int, intervall
 
 		if item.date.Before(start) {
 
-			fmt.Println("	small its before")
-			fmt.Println("	average: ", avg.avg, " total: ", avg.total, " sum: ", avg.sum)
-			fmt.Println()
 			avg.total--
 			avg.sum = avg.sum - item.price
 			avg.avg = avg.sum / avg.total
@@ -132,9 +180,6 @@ func checkInterval(l *list.List, lLarge *list.List, intervalsmall int, intervall
 
 		if item.date.Before(startLarge) {
 
-			fmt.Println("	large its before")
-			fmt.Println("	average large: ", avgLarge.avg, " total: ", avgLarge.total, " sum: ", avgLarge.sum)
-			fmt.Println()
 			avgLarge.total--
 			avgLarge.sum = avgLarge.sum - item.price
 			avgLarge.avg = avgLarge.sum / avgLarge.total
