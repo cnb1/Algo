@@ -18,9 +18,9 @@ type Result struct {
 	Crypto Price `json:"bitcoin"`
 }
 
-func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64) {
+func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, runningTimeMin time.Duration) {
 	fmt.Println("getting prices...")
-	end := start.Add(1 * time.Hour)
+	end := start.Add(runningTimeMin * time.Minute)
 
 	for {
 		time.Sleep(4 * time.Second)

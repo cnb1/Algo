@@ -26,13 +26,12 @@ type Position struct {
 	newPrice   bool
 }
 
-const intervalsmall = 10 //60
-const intervallarge = 30 //300
-const runningTimeMin = 5
+const intervalsmall = 60
+const intervallarge = 300
 
 var money float64 = 1000000
 
-func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
+func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, runningTimeMin time.Duration) {
 	// Gets the end value that the back value needs to be greater than
 	t1 := start.Add(time.Second * intervallarge)
 	ifCanTrade := false
@@ -60,7 +59,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 
 		// check if change in price
 		if position.inPosition && position.buy != price.price {
-			fmt.Println("[there is a new price]")
+			// fmt.Println("[there is a new price]")
 			position.newPrice = true
 		}
 
@@ -89,11 +88,11 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 			if position.inPosition {
 				if position.position == "long" && position.newPrice {
 
-					fmt.Println("long and new price")
+					// fmt.Println("long and new price")
 					// check if we need to close of a loss or a gain
 					if price.price < position.buy || price.price >= position.close {
 
-						fmt.Print("		closing long position, before money: ", money, " | at price : ", price.price)
+						fmt.Print("		closing long position, before money: ", money, " | at price : ", price.price, " Time: ", time.Now())
 
 						money += (price.price - position.buy)
 
@@ -104,13 +103,15 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 						position.newPrice = false
 
 						fmt.Println("		after long money: ", money)
+						fmt.Println()
+						fmt.Println()
 					}
 
 				} else if position.position == "short" && position.newPrice { // "short"
-					fmt.Println("short and new price")
+					// fmt.Println("short and new price")
 					if price.price > position.buy || price.price <= position.close {
 						// close for a loss
-						fmt.Print("		closing short position, before money: ", money, " | at price : ", price.price)
+						fmt.Print("		closing short position, before money: ", money, " | at price : ", price.price, " Time: ", time.Now())
 
 						money += (position.buy - price.price)
 
@@ -121,6 +122,8 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 						position.newPrice = false
 
 						fmt.Println("		after short money: ", money)
+						fmt.Println()
+						fmt.Println()
 					}
 				}
 			} else if avg.avg > avgLarge.avg {
@@ -132,7 +135,9 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 				position.inPosition = true
 				position.newPrice = false
 
-				fmt.Println("position: ", position.position, " buy at: ", position.buy, " close at ", position.close)
+				fmt.Println("position: ", position.position, " buy at: ", position.buy, " close at ", position.close, " Time: ", time.Now())
+				fmt.Println()
+				fmt.Println()
 
 			} else if avg.avg < avgLarge.avg {
 				// bearish
@@ -143,7 +148,9 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64) {
 				position.inPosition = true
 				position.newPrice = false
 
-				fmt.Println("position: ", position.position, " buy at: ", position.buy, " close at ", position.close)
+				fmt.Println("position: ", position.position, " buy at: ", position.buy, " close at ", position.close, " Time: ", time.Now())
+				fmt.Println()
+				fmt.Println()
 
 			} else {
 				// do nothing
