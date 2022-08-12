@@ -1,3 +1,42 @@
+// package main
+
+// import (
+// 	"encoding/json"
+// 	"fmt"
+// 	"log"
+// 	"net/http"
+// )
+
+// type Person struct {
+// 	Name string
+// 	Age  int
+// }
+
+// func personCreate(w http.ResponseWriter, r *http.Request) {
+// 	// Declare a new Person struct.
+// 	var p Person
+
+// 	// Try to decode the request body into the struct. If there is an error,
+// 	// respond to the client with the error message and a 400 status code.
+// 	err := json.NewDecoder(r.Body).Decode(&p)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	// Do something with the Person struct...
+// 	fmt.Println(p)
+// 	fmt.Fprintf(w, "Person: %+v", p)
+// }
+
+// func main() {
+// 	mux := http.NewServeMux()
+// 	mux.HandleFunc("/person/create", personCreate)
+
+// 	err := http.ListenAndServe(":4000", mux)
+// 	log.Fatal(err)
+// }
+
 package main
 
 import (
@@ -18,7 +57,7 @@ type Article struct {
 }
 
 type Message struct {
-	message string `json:"message"`
+	Message string `json:"message"`
 }
 
 // let's declare a global Articles array
@@ -29,7 +68,7 @@ var Articles []Article
 func main() {
 	fmt.Println("starting rest client...")
 	Articles = []Article{
-		Article{Title: "Hello", Desc: "Article Description", Content: "Article Content"},
+		Article{Title: "Hgello", Desc: "Article Description", Content: "Article Content"},
 		Article{Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
 	}
 	handleRequests()
@@ -43,12 +82,29 @@ func handleRequests() {
 }
 
 func createNewArticle(w http.ResponseWriter, r *http.Request) {
+	var m Message
+
+	// Try to decode the request body into the struct. If there is an error,
+	// respond to the client with the error message and a 400 status code.
+	err := json.NewDecoder(r.Body).Decode(&m)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Do something with the Person struct...
+	fmt.Println(m)
+	fmt.Fprintf(w, "Person: %+v", m)
+
 	fmt.Println("in creating article")
 	r.ParseForm()
 	for key, value := range r.Form {
 		fmt.Println(key, value)
 	}
 	fmt.Fprintln(w, "success message")
+	fmt.Println(w)
+	fmt.Println("-----")
+	fmt.Println(*r)
 	// decoder := json.NewDecoder(r.Body)
 	// var t Message
 	// err := decoder.Decode(&t)
