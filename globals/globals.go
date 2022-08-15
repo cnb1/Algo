@@ -9,6 +9,7 @@ import (
 var QuitPrice = make(map[string](chan bool))
 var QuitAlgo = make(map[string](chan bool))
 var Prices = make(map[string](chan float64))
+var Money = make(map[string]float64)
 
 func GetGID() uint64 {
 	b := make([]byte, 64)
