@@ -11,13 +11,13 @@ import (
 
 func StartStopCommand(ss *StartStop) {
 	command := ss.Command
-	fmt.Println("(B) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+	// fmt.Println("(B) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 
 	switch command {
 	case "start":
 
-		fmt.Println("Price map : ", globals.QuitPrice)
-		fmt.Println("Algo map : ", globals.QuitPrice)
+		// fmt.Println("Price map : ", globals.QuitPrice)
+		// fmt.Println("Algo map : ", globals.QuitPrice)
 
 		if val, ok := globals.QuitPrice[ss.Userid]; ok {
 			//do something here
@@ -30,9 +30,9 @@ func StartStopCommand(ss *StartStop) {
 
 		}
 
-		fmt.Println("map price : ", globals.QuitPrice)
-		fmt.Println("map algo : ", globals.QuitAlgo)
-		fmt.Println("map prices : ", globals.Prices)
+		// fmt.Println("map price : ", globals.QuitPrice)
+		// fmt.Println("map algo : ", globals.QuitAlgo)
+		// fmt.Println("map prices : ", globals.Prices)
 
 		var wg sync.WaitGroup
 
@@ -43,7 +43,7 @@ func StartStopCommand(ss *StartStop) {
 
 		start := time.Now()
 
-		fmt.Println("(C) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+		// fmt.Println("(C) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 
 		// start thread here for prices
 		go GetPrice(start, &wg, runningTimeMin, ss.Userid)
@@ -51,11 +51,11 @@ func StartStopCommand(ss *StartStop) {
 		// start thread here for the algo 1 min MA and a 5 min MA
 		go algorithms.Ma15(start, &wg, runningTimeMin, ss.Userid)
 
-		fmt.Println("(D) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+		// fmt.Println("(D) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 
 		wg.Wait()
 		fmt.Println("Finished Trading")
-		fmt.Println("Number of goroutines : ", runtime.NumGoroutine())
+		// fmt.Println("Number of goroutines : ", runtime.NumGoroutine())
 	case "stop":
 		fmt.Println("(E) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 		fmt.Println("stopping for user ", ss.Userid)

@@ -17,7 +17,7 @@ type StartStop struct {
 
 func Trading(w http.ResponseWriter, r *http.Request) {
 	var startStop StartStop
-	fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 	err := json.NewDecoder(r.Body).Decode(&startStop)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

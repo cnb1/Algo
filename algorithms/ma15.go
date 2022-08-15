@@ -4,7 +4,6 @@ import (
 	"Algo/globals"
 	"container/list"
 	"fmt"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -28,8 +27,8 @@ type Position struct {
 	newPrice   bool
 }
 
-const intervalsmall = 10
-const intervallarge = 30
+const intervalsmall = 60
+const intervallarge = 300
 
 var money float64 = 1000000
 
@@ -50,7 +49,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 	avgLarge := Average{avg: 0.0, sum: 0.0, total: 0.0}
 
 	for !time.Now().After(end) && !isQuit {
-		fmt.Println("(MA15 GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+		// fmt.Println("(MA15 GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 
 		select {
 		case isQuit = <-globals.QuitAlgo[userid]:
@@ -70,11 +69,13 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 			break
 		}
 		val := <-globals.Prices[userid]
+		fmt.Println("got price : ", val, " at time : ", time.Now())
+		fmt.Println()
 
 		price.price = val
 		price.date = time.Now()
 
-		fmt.Println("getting price of : ", price.price, " and size of ll large is ", lLarge.Len())
+		// fmt.Println("getting price of : ", price.price, " and size of ll large is ", lLarge.Len())
 
 		// check if change in price
 		if position.inPosition && position.buy != price.price {

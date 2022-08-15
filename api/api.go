@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -26,9 +25,9 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 	isQuit := false
 
 	for !time.Now().After(end) && !isQuit {
-		fmt.Println("(Price GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+		// fmt.Println("(Price GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 		time.Sleep(4 * time.Second)
-		fmt.Println("getting prices ....")
+		// fmt.Println("getting prices ....")
 
 		select {
 		case isQuit = <-globals.QuitPrice[userid]:
@@ -65,6 +64,9 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 
 		var result Result
 		json.Unmarshal(body, &result)
+
+		fmt.Println()
+		fmt.Println("sending price : ", result.Crypto.Usd, " at time : ", time.Now())
 
 		globals.Prices[userid] <- (float64(result.Crypto.Usd))
 	}
