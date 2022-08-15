@@ -1,8 +1,10 @@
 package algorithms
 
 import (
+	"Algo/globals"
 	"container/list"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -31,9 +33,9 @@ const intervallarge = 30
 
 var money float64 = 1000000
 
-func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, chnQuit <-chan bool,
-	runningTimeMin time.Duration) {
+func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
 	// Gets the end value that the back value needs to be greater than
+	isQuit := false
 	t1 := start.Add(time.Second * intervallarge)
 	var price Price
 	ifCanTrade := false
@@ -47,13 +49,15 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, chnQuit <-chan
 	avg := Average{avg: 0.0, sum: 0.0, total: 0.0}
 	avgLarge := Average{avg: 0.0, sum: 0.0, total: 0.0}
 
-	for {
+	for !time.Now().After(end) && !isQuit {
+		fmt.Println("(MA15 GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 
 		select {
-		case isQuit := <-chnQuit:
+		case isQuit = <-globals.QuitAlgo[userid]:
 			fmt.Println("is going to quit trading: ", isQuit)
 			if isQuit {
 				wg.Done()
+				fmt.Println("After ma15 wg done")
 			}
 		default:
 		}
@@ -62,13 +66,15 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, chnQuit <-chan
 			fmt.Println()
 			fmt.Println("stopping ma15...")
 			wg.Done()
+			fmt.Println("after ma15 wg done")
+			break
 		}
-		val := <-ch
+		val := <-globals.Prices[userid]
 
 		price.price = val
 		price.date = time.Now()
 
-		fmt.Println("getting price and size of ll large is ", lLarge.Len())
+		fmt.Println("getting price of : ", price.price, " and size of ll large is ", lLarge.Len())
 
 		// check if change in price
 		if position.inPosition && position.buy != price.price {

@@ -1,11 +1,13 @@
 package api
 
 import (
+	"Algo/globals"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -18,18 +20,21 @@ type Result struct {
 	Crypto Price `json:"bitcoin"`
 }
 
-func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, chnQuit chan bool,
-	runningTimeMin time.Duration) {
+func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
 	fmt.Println("getting prices...")
 	end := start.Add(runningTimeMin * time.Minute)
+	isQuit := false
 
-	for {
+	for !time.Now().After(end) && !isQuit {
+		fmt.Println("(Price GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 		time.Sleep(4 * time.Second)
+		fmt.Println("getting prices ....")
 
 		select {
-		case isQuit := <-chnQuit:
+		case isQuit = <-globals.QuitPrice[userid]:
 			fmt.Println("is going to quit prices : ", isQuit)
 			if isQuit {
+				fmt.Println("After print wg done")
 				wg.Done()
 			}
 		default:
@@ -38,6 +43,7 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, chnQuit chan
 		if time.Now().After(end) {
 			fmt.Println("stopping prices...")
 			wg.Done()
+			fmt.Println("After prices wg done")
 		}
 
 		resp, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
@@ -60,6 +66,6 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, chnQuit chan
 		var result Result
 		json.Unmarshal(body, &result)
 
-		ch <- (float64(result.Crypto.Usd))
+		globals.Prices[userid] <- (float64(result.Crypto.Usd))
 	}
 }

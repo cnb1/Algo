@@ -1,8 +1,11 @@
 package api
 
 import (
+	"Algo/globals"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"runtime"
 )
 
 type StartStop struct {
@@ -12,11 +15,9 @@ type StartStop struct {
 	Command  string  `json:"command"`
 }
 
-var quit = make(map[string](chan bool))
-
 func Trading(w http.ResponseWriter, r *http.Request) {
 	var startStop StartStop
-
+	fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 	err := json.NewDecoder(r.Body).Decode(&startStop)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -31,10 +32,25 @@ func Trading(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(`{"message": "POST method requested"}`))
-		StartStopCommand(&startStop, quit)
+		StartStopCommand(&startStop)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
 	}
+}
 
+func StopTrading(w http.ResponseWriter, r *http.Request) {
+	var startStop StartStop
+	fmt.Println("(BB) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+	err := json.NewDecoder(r.Body).Decode(&startStop)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Println("(E) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+	fmt.Println("stopping for user ", startStop.Userid)
+	globals.QuitPrice[startStop.Userid] <- true
+	globals.QuitAlgo[startStop.Userid] <- true
+	fmt.Println("map price : ", globals.QuitPrice)
+	fmt.Println("map algo : ", globals.QuitAlgo)
 }
