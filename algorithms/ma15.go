@@ -26,14 +26,16 @@ type Position struct {
 	newPrice   bool
 }
 
-const intervalsmall = 60
-const intervallarge = 300
+const intervalsmall = 10
+const intervallarge = 30
 
 var money float64 = 1000000
 
-func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, runningTimeMin time.Duration) {
+func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, chnQuit <-chan bool,
+	runningTimeMin time.Duration) {
 	// Gets the end value that the back value needs to be greater than
 	t1 := start.Add(time.Second * intervallarge)
+	var price Price
 	ifCanTrade := false
 	position := Position{buy: 0, close: 0, inPosition: false, newPrice: false}
 
@@ -46,16 +48,27 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, runningTimeMin
 	avgLarge := Average{avg: 0.0, sum: 0.0, total: 0.0}
 
 	for {
+
+		select {
+		case isQuit := <-chnQuit:
+			fmt.Println("is going to quit: ", isQuit)
+			if isQuit {
+				wg.Done()
+			}
+		default:
+		}
+
 		if time.Now().After(end) {
 			fmt.Println()
-			fmt.Println("time to cancel ma15")
+			fmt.Println("stopping ma15...")
 			wg.Done()
 		}
 		val := <-ch
 
-		var price Price
 		price.price = val
 		price.date = time.Now()
+
+		fmt.Println("getting price and size of ll large is ", lLarge.Len())
 
 		// check if change in price
 		if position.inPosition && position.buy != price.price {

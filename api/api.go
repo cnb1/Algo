@@ -18,15 +18,25 @@ type Result struct {
 	Crypto Price `json:"bitcoin"`
 }
 
-func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, runningTimeMin time.Duration) {
+func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, chnQuit chan bool,
+	runningTimeMin time.Duration) {
 	fmt.Println("getting prices...")
 	end := start.Add(runningTimeMin * time.Minute)
 
 	for {
 		time.Sleep(4 * time.Second)
 
+		select {
+		case isQuit := <-chnQuit:
+			fmt.Println("is going to quit ", isQuit)
+			if isQuit {
+				wg.Done()
+			}
+		default:
+		}
+
 		if time.Now().After(end) {
-			fmt.Println("time to cacnel")
+			fmt.Println("stopping prices...")
 			wg.Done()
 		}
 
@@ -51,5 +61,6 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, runningTimeM
 		json.Unmarshal(body, &result)
 
 		ch <- (float64(result.Crypto.Usd))
+		chnQuit <- false
 	}
 }
