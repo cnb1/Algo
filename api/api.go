@@ -28,7 +28,7 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, chnQuit chan
 
 		select {
 		case isQuit := <-chnQuit:
-			fmt.Println("is going to quit ", isQuit)
+			fmt.Println("is going to quit prices : ", isQuit)
 			if isQuit {
 				wg.Done()
 			}
@@ -61,6 +61,5 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, ch chan float64, chnQuit chan
 		json.Unmarshal(body, &result)
 
 		ch <- (float64(result.Crypto.Usd))
-		chnQuit <- false
 	}
 }

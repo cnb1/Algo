@@ -51,7 +51,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, ch <-chan float64, chnQuit <-chan
 
 		select {
 		case isQuit := <-chnQuit:
-			fmt.Println("is going to quit: ", isQuit)
+			fmt.Println("is going to quit trading: ", isQuit)
 			if isQuit {
 				wg.Done()
 			}

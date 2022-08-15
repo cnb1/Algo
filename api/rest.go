@@ -12,6 +12,8 @@ type StartStop struct {
 	Command  string  `json:"command"`
 }
 
+var quit = make(map[string](chan bool))
+
 func Trading(w http.ResponseWriter, r *http.Request) {
 	var startStop StartStop
 
@@ -29,7 +31,7 @@ func Trading(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(`{"message": "POST method requested"}`))
-		StartStopCommand(&startStop)
+		StartStopCommand(&startStop, quit)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
