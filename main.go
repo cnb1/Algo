@@ -3,7 +3,6 @@ package main
 import (
 	"Algo/algorithms"
 	"Algo/api"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,44 +10,29 @@ import (
 	"time"
 )
 
-type Article struct {
-	Title   string `json:"Title"`
-	Desc    string `json:"desc"`
-	Content string `json:"content"`
-}
-
 type Message struct {
-	message string `json:"message"`
+	Message string `json:"message"`
 }
-
-// let's declare a global Articles array
-// that we can then populate in our main function
-// to simulate a database
-var Articles []Article
 
 func main() {
 	fmt.Println("starting rest client...")
-	Articles = []Article{
-		Article{Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-		Article{Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
-	}
+
 	handleRequests()
 }
 
 func handleRequests() {
 	http.HandleFunc("/", homePage)
-	http.HandleFunc("/articles", returnAllArticles)
 	http.HandleFunc("/article", createNewArticle)
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
 }
 
 func createNewArticle(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("in creating article")
-	r.ParseForm()
-	for key, value := range r.Form {
-		fmt.Println(key, value)
-	}
-	fmt.Fprintln(w, "success message")
+	// r.ParseForm()
+	// for key, value := range r.Form {
+	// 	fmt.Println(key, value)
+	// }
+	// fmt.Fprintln(w, "success message")
 	// decoder := json.NewDecoder(r.Body)
 	// var t Message
 	// err := decoder.Decode(&t)
@@ -103,11 +87,6 @@ func createNewArticle(w http.ResponseWriter, r *http.Request) {
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
-}
-
-func returnAllArticles(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: returnAllArticles")
-	json.NewEncoder(w).Encode(Articles)
 }
 
 func runProgram() {
