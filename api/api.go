@@ -35,6 +35,7 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 			if isQuit {
 				fmt.Println("After print wg done")
 				wg.Done()
+				return
 			}
 		default:
 		}
@@ -68,6 +69,9 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 		fmt.Println()
 		fmt.Println("sending price : ", result.Crypto.Usd, " at time : ", time.Now())
 
+		// If we can recieve on the channel then it is NOT closed
+
 		globals.Prices[userid] <- (float64(result.Crypto.Usd))
 	}
+
 }

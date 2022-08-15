@@ -37,6 +37,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 	isQuit := false
 	t1 := start.Add(time.Second * intervallarge)
 	var price Price
+	var val float64
 	ifCanTrade := false
 	position := Position{buy: 0, close: 0, inPosition: false, newPrice: false}
 
@@ -66,9 +67,19 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 			fmt.Println("stopping ma15...")
 			wg.Done()
 			fmt.Println("after ma15 wg done")
-			break
 		}
-		val := <-globals.Prices[userid]
+
+		select {
+		case val := <-globals.Prices[userid]:
+			fmt.Println(val)
+		case <-time.After(time.Second * 2):
+			fmt.Println("Timeout")
+			wg.Done()
+			globals.QuitPrice[userid] <- true
+			isQuit = true
+			continue
+		}
+
 		fmt.Println("got price : ", val, " at time : ", time.Now())
 		fmt.Println()
 

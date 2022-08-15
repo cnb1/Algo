@@ -37,7 +37,7 @@ func StartStopCommand(ss *StartStop) {
 		var wg sync.WaitGroup
 
 		fmt.Println("starting ", ss.Strategy)
-		const runningTimeMin = 180
+		const runningTimeMin = 1
 
 		wg.Add(2)
 
