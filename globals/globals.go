@@ -10,7 +10,14 @@ import (
 
 type Profile struct {
 	Users list.List
+	Money float64
 	mu    sync.Mutex
+}
+
+type User struct {
+	userid   string
+	money    float64
+	strategy string
 }
 
 var QuitPrice = make(map[string](chan bool))
@@ -18,6 +25,7 @@ var QuitAlgo = make(map[string](chan bool))
 var Prices = make(map[string](chan float64))
 var Money = make(map[string]float64)
 var ProfilesToRun = Profile{Users: *list.New()}
+var QuitProgram = false
 
 const sizeMaxProfiles int = 5
 
@@ -40,12 +48,13 @@ func GetProfile() string {
 	return prof
 }
 
-func AddProfile(userid string) bool {
+func AddProfile(userid string, money float64, strategy string) bool {
 
 	ProfilesToRun.mu.Lock()
 	var ret bool
 	if ProfilesToRun.Users.Len() < sizeMaxProfiles {
-		ProfilesToRun.Users.PushBack(userid)
+		profTemp := User{userid: userid, money: money, strategy: strategy}
+		ProfilesToRun.Users.PushBack(profTemp)
 		ret = true
 	} else {
 		ret = false
@@ -54,4 +63,27 @@ func AddProfile(userid string) bool {
 	ProfilesToRun.mu.Unlock()
 
 	return ret
+}
+
+func RemoveUser(userid string) bool {
+
+	ProfilesToRun.mu.Lock()
+	var ret bool = false
+	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+		if e.Value.(User).userid == userid {
+			ret = true
+			ProfilesToRun.Users.Remove(e)
+		}
+	}
+	ProfilesToRun.mu.Unlock()
+
+	return ret
+}
+
+func KillProgram() {
+	QuitProgram = true
+}
+
+func GetQuitProgram() bool {
+	return QuitProgram
 }

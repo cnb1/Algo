@@ -7,17 +7,24 @@ import (
 	"net/http"
 )
 
-type StartStop struct {
+type AddStruct struct {
 	Strategy string  `json:"strategy"`
 	Userid   string  `json:"userid"`
 	Money    float64 `json:"money"`
-	Command  string  `json:"command"`
 }
 
-func Trading(w http.ResponseWriter, r *http.Request) {
-	var startStop StartStop
+type RemoveStruct struct {
+	Userid string `json:"userid"`
+}
+
+type UserIDStruct struct {
+	Userid string `json:"userid"`
+}
+
+func AddUser(w http.ResponseWriter, r *http.Request) {
+	var newUser AddStruct
 	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
-	err := json.NewDecoder(r.Body).Decode(&startStop)
+	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -26,8 +33,38 @@ func Trading(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(`{"message": "POST method requested"}`))
-		StartStopCommand(&startStop)
+		if globals.AddProfile(newUser.Userid, newUser.Money, newUser.Strategy) {
+			fmt.Fprint(w, "message : ")
+			fmt.Fprint(w, "user : ", newUser.Userid, " was added")
+		} else {
+			fmt.Fprint(w, "message : ")
+			fmt.Fprint(w, "user : ", newUser.Userid, " was not added, max users added")
+		}
+	default:
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"message": "Can't find method requested"}`))
+	}
+}
+
+func RemoveUser(w http.ResponseWriter, r *http.Request) {
+	var removeUser RemoveStruct
+	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+	err := json.NewDecoder(r.Body).Decode(&removeUser)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case "POST":
+		w.WriteHeader(http.StatusCreated)
+		if globals.RemoveUser(removeUser.Userid) {
+			fmt.Fprint(w, "message : ")
+			fmt.Fprint(w, "user : ", removeUser.Userid, " was removed")
+		} else {
+			fmt.Fprint(w, "message : ")
+			fmt.Fprint(w, "user : ", removeUser.Userid, " was not removed")
+		}
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
@@ -35,9 +72,9 @@ func Trading(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {
-	var startStop StartStop
+	var user UserIDStruct
 	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
-	err := json.NewDecoder(r.Body).Decode(&startStop)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -47,7 +84,7 @@ func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "Money : ")
-		fmt.Fprint(w, globals.Money[startStop.Userid])
+		fmt.Fprint(w, globals.Money[user.Userid])
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
