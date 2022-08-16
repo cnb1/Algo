@@ -27,10 +27,10 @@ type Position struct {
 	newPrice   bool
 }
 
+var money float64
+
 const intervalsmall = 60
 const intervallarge = 300
-
-var money float64 = 1000000
 
 func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
 	// Gets the end value that the back value needs to be greater than
@@ -38,6 +38,8 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 	t1 := start.Add(time.Second * intervallarge)
 	var price Price
 	var val float64
+	money = globals.Money[userid]
+
 	ifCanTrade := false
 	position := Position{buy: 0, close: 0, inPosition: false, newPrice: false}
 
@@ -70,9 +72,9 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 		}
 
 		select {
-		case val := <-globals.Prices[userid]:
+		case val = <-globals.Prices[userid]:
 			fmt.Println(val)
-		case <-time.After(time.Second * 2):
+		case <-time.After(time.Second * 10):
 			fmt.Println("Timeout")
 			wg.Done()
 			globals.QuitPrice[userid] <- true
@@ -186,6 +188,10 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 			} else {
 				// do nothing
 				fmt.Println("dont buy anything")
+			}
+
+			if money != globals.Money[userid] {
+				globals.Money[userid] = money
 			}
 		}
 

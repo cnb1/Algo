@@ -11,6 +11,7 @@ import (
 
 func StartStopCommand(ss *StartStop) {
 	command := ss.Command
+	globals.Money[ss.Userid] = ss.Money
 	// fmt.Println("(B) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 
 	switch command {
@@ -37,7 +38,7 @@ func StartStopCommand(ss *StartStop) {
 		var wg sync.WaitGroup
 
 		fmt.Println("starting ", ss.Strategy)
-		const runningTimeMin = 1
+		const runningTimeMin = 180
 
 		wg.Add(2)
 
@@ -59,10 +60,10 @@ func StartStopCommand(ss *StartStop) {
 	case "stop":
 		fmt.Println("(E) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 		fmt.Println("stopping for user ", ss.Userid)
-		fmt.Println("map price : ", globals.QuitPrice)
-		fmt.Println("map algo : ", globals.QuitAlgo)
 		globals.QuitPrice[ss.Userid] <- true
 		globals.QuitAlgo[ss.Userid] <- true
+		fmt.Println("map price : ", globals.QuitPrice)
+		fmt.Println("map algo : ", globals.QuitAlgo)
 	}
 
 }

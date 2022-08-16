@@ -14,6 +14,6 @@ func main() {
 	fmt.Println(globals.GetGID())
 	fmt.Println("starting rest client...")
 	http.HandleFunc("/", api.Trading)
-	http.HandleFunc("/stop", api.StopTrading)
+	http.HandleFunc("/money", api.GetMoneyForUser)
 	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
 }
