@@ -15,16 +15,17 @@ type Profile struct {
 }
 
 type User struct {
-	userid   string
-	money    float64
-	strategy string
+	Userid   string
+	Money    float64
+	Strategy string
+	Status   string
 }
 
 var QuitPrice = make(map[string](chan bool))
 var QuitAlgo = make(map[string](chan bool))
 var Prices = make(map[string](chan float64))
 var Money = make(map[string]float64)
-var ProfilesToRun = Profile{Users: *list.New()}
+var ProfilesToRun = Profile{}
 var QuitProgram = false
 
 const sizeMaxProfiles int = 5
@@ -53,7 +54,8 @@ func AddProfile(userid string, money float64, strategy string) bool {
 	ProfilesToRun.mu.Lock()
 	var ret bool
 	if ProfilesToRun.Users.Len() < sizeMaxProfiles {
-		profTemp := User{userid: userid, money: money, strategy: strategy}
+		profTemp := User{Userid: userid, Money: money, Strategy: strategy,
+			Status: "nt"}
 		ProfilesToRun.Users.PushBack(profTemp)
 		ret = true
 	} else {
@@ -70,7 +72,7 @@ func RemoveUser(userid string) bool {
 	ProfilesToRun.mu.Lock()
 	var ret bool = false
 	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
-		if e.Value.(User).userid == userid {
+		if e.Value.(User).Userid == userid {
 			ret = true
 			ProfilesToRun.Users.Remove(e)
 		}
@@ -78,6 +80,19 @@ func RemoveUser(userid string) bool {
 	ProfilesToRun.mu.Unlock()
 
 	return ret
+}
+
+func UpdateStatus(user User) {
+	ProfilesToRun.mu.Lock()
+	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+		if e.Value.(User).Userid == user.Userid {
+			item := User{Userid: user.Userid, Money: user.Money, Strategy: user.Strategy,
+				Status: "t"}
+			ProfilesToRun.Users.Remove(e)
+			ProfilesToRun.Users.PushBack(item)
+		}
+	}
+	ProfilesToRun.mu.Unlock()
 }
 
 func KillProgram() {
