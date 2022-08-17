@@ -58,13 +58,23 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
-		if globals.RemoveUser(removeUser.Userid) {
-			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user : ", removeUser.Userid, " was removed")
+
+		user, err := globals.GetUser(removeUser.Userid)
+
+		if err != nil {
+			fmt.Fprint(w, "message : User ", removeUser.Userid, " doesnt exist in context")
 		} else {
 			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user : ", removeUser.Userid, " was not removed")
+			fmt.Fprint(w, "user ", removeUser.Userid, " was removed")
+			fmt.Fprint(w, "money value is : ", user.Money)
+			globals.RemoveUser(removeUser.Userid)
 		}
+
+		// need to check if a user is in the prices channel
+		if globals.CheckUserInPrices(removeUser.Userid) {
+			Stop(removeUser.Userid)
+		}
+
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
@@ -90,4 +100,16 @@ func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
 	}
 
+}
+
+func KillProgram(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "Killed Program")
+		globals.KillProgram()
+	default:
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"message": "Can't find method requested"}`))
+	}
 }

@@ -3,6 +3,8 @@ package globals
 import (
 	"bytes"
 	"container/list"
+	"errors"
+	"fmt"
 	"runtime"
 	"strconv"
 	"sync"
@@ -10,7 +12,6 @@ import (
 
 type Profile struct {
 	Users list.List
-	Money float64
 	mu    sync.Mutex
 }
 
@@ -47,6 +48,19 @@ func GetProfile() string {
 	ProfilesToRun.mu.Unlock()
 
 	return prof
+}
+
+func GetUser(userid string) (User, error) {
+	ProfilesToRun.mu.Lock()
+
+	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+		if e.Value.(User).Userid == userid {
+			return e.Value.(User), nil
+		}
+	}
+	err := errors.New("cant find")
+	ProfilesToRun.mu.Unlock()
+	return User{}, err
 }
 
 func AddProfile(userid string, money float64, strategy string) bool {
@@ -101,4 +115,14 @@ func KillProgram() {
 
 func GetQuitProgram() bool {
 	return QuitProgram
+}
+
+func CheckUserInPrices(userid string) bool {
+	_, ok := Prices[userid]
+	if ok {
+		return true
+	} else {
+		fmt.Println("The user was not found in prices")
+		return false
+	}
 }

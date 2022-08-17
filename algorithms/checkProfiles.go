@@ -3,6 +3,7 @@ package algorithms
 import (
 	"Algo/globals"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -28,5 +29,8 @@ func ReadProfiles() {
 			}
 		}
 		fmt.Println()
+
 	}
+
+	os.Exit(4)
 }
