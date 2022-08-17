@@ -9,6 +9,8 @@ import (
 func ReadProfiles() {
 
 	// TODO need to add logic for killing program
+	// add logic to remove user when prompted from rest to stop
+	//	the trading when removed
 
 	for !globals.QuitProgram {
 		time.Sleep(5 * time.Second)
