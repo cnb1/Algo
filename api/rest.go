@@ -35,10 +35,10 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		if globals.AddProfile(newUser.Userid, newUser.Money, newUser.Strategy) {
 			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user : ", newUser.Userid, " was added")
+			fmt.Fprint(w, "user ", newUser.Userid, " was added")
 		} else {
 			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user : ", newUser.Userid, " was not added, max users added")
+			fmt.Fprint(w, "user ", newUser.Userid, " was not added, max users added")
 		}
 	default:
 		w.WriteHeader(http.StatusNotFound)
@@ -64,14 +64,18 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprint(w, "message : User ", removeUser.Userid, " doesnt exist in context")
 		} else {
+
 			fmt.Fprint(w, "message : ")
 			fmt.Fprint(w, "user ", removeUser.Userid, " was removed")
 			fmt.Fprint(w, "money value is : ", user.Money)
+
 			globals.RemoveUser(removeUser.Userid)
+
 		}
 
 		// need to check if a user is in the prices channel
 		if globals.CheckUserInPrices(removeUser.Userid) {
+			fmt.Println("Stopping the program")
 			Stop(removeUser.Userid)
 		}
 

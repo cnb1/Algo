@@ -52,15 +52,17 @@ func GetProfile() string {
 
 func GetUser(userid string) (User, error) {
 	ProfilesToRun.mu.Lock()
-
+	var user User
+	var err error
 	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
 		if e.Value.(User).Userid == userid {
+			ProfilesToRun.mu.Unlock()
 			return e.Value.(User), nil
 		}
 	}
-	err := errors.New("cant find")
 	ProfilesToRun.mu.Unlock()
-	return User{}, err
+	user, err = User{}, errors.New("Nothing found")
+	return user, err
 }
 
 func AddProfile(userid string, money float64, strategy string) bool {
@@ -82,8 +84,8 @@ func AddProfile(userid string, money float64, strategy string) bool {
 }
 
 func RemoveUser(userid string) bool {
-
 	ProfilesToRun.mu.Lock()
+
 	var ret bool = false
 	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
 		if e.Value.(User).Userid == userid {
