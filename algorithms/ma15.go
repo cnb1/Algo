@@ -33,7 +33,10 @@ const intervalsmall = 60
 const intervallarge = 300
 
 func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
+
 	// Gets the end value that the back value needs to be greater than
+	fmt.Println("ma15 execute")
+
 	isQuit := false
 	t1 := start.Add(time.Second * intervallarge)
 	var price Price
@@ -43,7 +46,6 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 	ifCanTrade := false
 	position := Position{buy: 0, close: 0, inPosition: false, newPrice: false}
 
-	fmt.Println("ma15 execute")
 	end := start.Add(runningTimeMin * time.Minute)
 	l := list.New()
 	lLarge := list.New()

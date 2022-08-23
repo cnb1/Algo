@@ -44,9 +44,10 @@ func Start(userid string, money float64, strategy string) {
 
 func Stop(userid string) {
 	// fmt.Println("(E) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
-	fmt.Println("stopping for user ", userid)
+	fmt.Println("[STOP FUNC] stopping for user ", userid)
 	globals.QuitPrice[userid] <- true
-	globals.QuitAlgo[userid] <- true
+	fmt.Println("[STOP FUNC] after quit price")
+	fmt.Println("[STOP FUNC] after quit algo price")
 	fmt.Println("map price : ", globals.QuitPrice)
 	fmt.Println("map algo : ", globals.QuitAlgo)
 

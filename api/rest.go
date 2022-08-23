@@ -58,8 +58,9 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
-
+		fmt.Println("[STOP] Attempting to remove ")
 		user, err := globals.GetUser(removeUser.Userid)
+		fmt.Println("[STOP] removed user ")
 
 		if err != nil {
 			fmt.Fprint(w, "message : User ", removeUser.Userid, " doesnt exist in context")
@@ -83,6 +84,8 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
 	}
+
+	fmt.Println("[STOP] leaving the remove users")
 }
 
 func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {
