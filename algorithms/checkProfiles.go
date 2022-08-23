@@ -16,6 +16,7 @@ func ReadProfiles() {
 
 	var wg sync.WaitGroup
 
+	wg.Add(1)
 	for !globals.QuitProgram {
 		time.Sleep(5 * time.Second)
 		fmt.Println("")
