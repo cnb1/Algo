@@ -67,7 +67,7 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 
 			fmt.Fprint(w, "message : ")
 			fmt.Fprint(w, "user ", removeUser.Userid, " was removed")
-			fmt.Fprint(w, "money value is : ", user.Money)
+			fmt.Fprint(w, ", money value is : ", user.Money)
 
 			globals.RemoveUser(removeUser.Userid)
 
