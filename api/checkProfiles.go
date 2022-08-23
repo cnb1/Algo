@@ -1,12 +1,13 @@
-package algorithms
+package api
 
 import (
 	"Algo/globals"
 	"fmt"
 	"os"
-	"sync"
 	"time"
 )
+
+const runningTimeMin = 180
 
 func ReadProfiles() {
 
@@ -14,9 +15,6 @@ func ReadProfiles() {
 	// add logic to remove user when prompted from rest to stop
 	//	the trading when removed
 
-	var wg sync.WaitGroup
-
-	wg.Add(1)
 	for !globals.QuitProgram {
 		time.Sleep(5 * time.Second)
 		fmt.Println("")
@@ -26,10 +24,9 @@ func ReadProfiles() {
 			userTemp := globals.User(e.Value.(globals.User))
 			if userTemp.Status == "nt" {
 				globals.UpdateStatus(userTemp)
-				go GetPrice(start, &wg, chnPrices, quit[ss.Userid], runningTimeMin)
 
 				// start thread here for the algo 1 min MA and a 5 min MA
-				go algorithms.Ma15(start, &wg, chnPrices, quit[ss.Userid], runningTimeMin)
+				Start(userTemp.Userid, userTemp.Money, userTemp.Strategy)
 			}
 
 			if userTemp.Status == "t" {
@@ -39,6 +36,5 @@ func ReadProfiles() {
 		fmt.Println()
 
 	}
-	wg.Done()
 	os.Exit(4)
 }

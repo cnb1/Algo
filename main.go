@@ -1,7 +1,6 @@
 package main
 
 import (
-	"Algo/algorithms"
 	"Algo/api"
 	"fmt"
 	"log"
@@ -11,7 +10,7 @@ import (
 func main() {
 	fmt.Println("starting rest client...")
 
-	go algorithms.ReadProfiles()
+	go api.ReadProfiles()
 	http.HandleFunc("/start", api.AddUser)
 	http.HandleFunc("/stop", api.RemoveUser)
 	http.HandleFunc("/money", api.GetMoneyForUser)
