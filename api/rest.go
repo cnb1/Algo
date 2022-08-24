@@ -46,7 +46,7 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func RemoveUser(w http.ResponseWriter, r *http.Request) {
+func UpdateToRemoveStatus(w http.ResponseWriter, r *http.Request) {
 	var removeUser RemoveStruct
 	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 	err := json.NewDecoder(r.Body).Decode(&removeUser)
@@ -58,26 +58,18 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
-		fmt.Println("[STOP] Attempting to remove ")
 		user, err := globals.GetUser(removeUser.Userid)
-		fmt.Println("[STOP] removed user ")
 
 		if err != nil {
 			fmt.Fprint(w, "message : User ", removeUser.Userid, " doesnt exist in context")
 		} else {
 
 			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user ", removeUser.Userid, " was removed")
+			fmt.Fprint(w, "user ", removeUser.Userid, " was updated to rm")
 			fmt.Fprint(w, ", money value is : ", user.Money)
 
-			globals.RemoveUser(removeUser.Userid)
+			globals.UpdateStatusToRemove(removeUser.Userid)
 
-		}
-
-		// need to check if a user is in the prices channel
-		if globals.CheckUserInPrices(removeUser.Userid) {
-			fmt.Println("Stopping the program")
-			Stop(removeUser.Userid)
 		}
 
 	default:
@@ -85,7 +77,8 @@ func RemoveUser(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
 	}
 
-	fmt.Println("[STOP] leaving the remove users")
+	fmt.Println("[UPDATE] leaving the remove update")
+
 }
 
 func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {

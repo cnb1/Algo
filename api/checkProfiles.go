@@ -15,21 +15,22 @@ func ReadProfiles() {
 	// add logic to remove user when prompted from rest to stop
 	//	the trading when removed
 
+	// var wg sync.WaitGroup
+
 	for !globals.QuitProgram {
 		time.Sleep(5 * time.Second)
 		fmt.Println("")
 		fmt.Print("-> Users trading : ")
 		for e := globals.ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
-			// go StartStopCommand()
 			userTemp := globals.User(e.Value.(globals.User))
-			if userTemp.Status == "nt" {
+
+			if userTemp.Status == "rm" {
+				removeUser(userTemp.Userid)
+
+			} else if userTemp.Status == "nt" {
 				globals.UpdateStatus(userTemp)
-
-				// start thread here for the algo 1 min MA and a 5 min MA
-				Start(userTemp.Userid, userTemp.Money, userTemp.Strategy)
-			}
-
-			if userTemp.Status == "t" {
+				go Start(userTemp.Userid, userTemp.Money, userTemp.Strategy)
+			} else if userTemp.Status == "t" {
 				fmt.Print(userTemp.Userid, " | ")
 			}
 		}
@@ -37,4 +38,27 @@ func ReadProfiles() {
 
 	}
 	os.Exit(4)
+}
+
+func removeUser(userid string) {
+	user, err := globals.GetUser(userid)
+
+	if err != nil {
+		fmt.Println("message : User ", userid, " doesnt exist in context")
+	} else {
+
+		fmt.Print("message : ")
+		fmt.Print("user ", userid, " was removed")
+		fmt.Println(", money value is : ", user.Money)
+
+		globals.RemoveUser(userid)
+
+	}
+
+	// need to check if a user is in the prices channel
+	if globals.CheckUserInPrices(userid) {
+		fmt.Println("Stopping the program")
+		Stop(userid)
+	}
+
 }

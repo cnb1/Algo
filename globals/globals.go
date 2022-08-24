@@ -51,7 +51,10 @@ func GetProfile() string {
 }
 
 func GetUser(userid string) (User, error) {
+	fmt.Println("get user print")
+	PrintProfiles()
 	ProfilesToRun.mu.Lock()
+
 	var user User
 	var err error
 	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
@@ -85,7 +88,6 @@ func AddProfile(userid string, money float64, strategy string) bool {
 
 func RemoveUser(userid string) bool {
 	ProfilesToRun.mu.Lock()
-
 	var ret bool = false
 	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
 		if e.Value.(User).Userid == userid {
@@ -107,6 +109,28 @@ func UpdateStatus(user User) {
 			ProfilesToRun.Users.Remove(e)
 			ProfilesToRun.Users.PushBack(item)
 		}
+	}
+	ProfilesToRun.mu.Unlock()
+}
+
+func UpdateStatusToRemove(userid string) {
+	ProfilesToRun.mu.Lock()
+	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+		if e.Value.(User).Userid == userid {
+			item := User{Userid: userid, Money: e.Value.(User).Money, Strategy: e.Value.(User).Strategy,
+				Status: "rm"}
+			ProfilesToRun.Users.Remove(e)
+			ProfilesToRun.Users.PushBack(item)
+		}
+	}
+	ProfilesToRun.mu.Unlock()
+}
+
+func PrintProfiles() {
+	ProfilesToRun.mu.Lock()
+	fmt.Println("Printing the profiles...")
+	for e := ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+		fmt.Println(e.Value.(User))
 	}
 	ProfilesToRun.mu.Unlock()
 }
