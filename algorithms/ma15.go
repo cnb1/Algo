@@ -75,7 +75,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 
 		select {
 		case val = <-globals.Prices[userid]:
-			fmt.Println(val)
+			// fmt.Println(val)
 		case <-time.After(time.Second * 10):
 			fmt.Println("Timeout")
 			wg.Done()
@@ -84,7 +84,7 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 			continue
 		}
 
-		fmt.Println("got price : ", val, " at time : ", time.Now())
+		fmt.Println("got price : ", val, " at time : ", time.Now(), " FOR USER [", userid, "]")
 		fmt.Println()
 
 		price.price = val

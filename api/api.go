@@ -67,7 +67,7 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 		json.Unmarshal(body, &result)
 
 		fmt.Println()
-		fmt.Println("sending price : ", result.Crypto.Usd, " at time : ", time.Now())
+		fmt.Println("sending price : ", result.Crypto.Usd, " at time : ", time.Now(), " FOR USER [", userid, "]")
 
 		// If we can recieve on the channel then it is NOT closed
 

@@ -51,8 +51,6 @@ func GetProfile() string {
 }
 
 func GetUser(userid string) (User, error) {
-	fmt.Println("get user print")
-	PrintProfiles()
 	ProfilesToRun.mu.Lock()
 
 	var user User
