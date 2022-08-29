@@ -23,8 +23,13 @@ type UserIDStruct struct {
 	Userid string `json:"userid"`
 }
 
+type Response struct {
+	Message string `json:"message"`
+}
+
 func AddUser(w http.ResponseWriter, r *http.Request) {
 	var newUser AddStruct
+
 	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
@@ -37,13 +42,26 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		if globals.AddProfile(newUser.Userid, newUser.Money, newUser.Strategy) {
 			w.Header().Set("Content-Type", "application/json")
+			// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			// w.Header().Set("Access-Control-Allow-Origin", "*")
 			resp := make(map[string]string)
 			resp["message"] = "user " + newUser.Userid + " was added"
-			jsonResp, err := json.Marshal(resp)
+			jsonResp, err := json.Marshal(&resp)
 			if err != nil {
 				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 			}
-			w.Write(jsonResp)
+			in := []byte(`{"id":1,"name":"test","context":{"key1":"value1","key2":2}}`)
+			w.Write(in)
+			fmt.Println(jsonResp)
+			return
+			// var resptemp Response
+			// errMar := json.Unmarshal(jsonResp, &resptemp)
+
+			// if errMar != nil {
+			// 	fmt.Println("error in unmarshalling")
+			// }
+
+			// fmt.Println(resptemp)
 			// fmt.Fprint(w, "message : ")
 			// fmt.Fprint(w, "user ", newUser.Userid, " was added")
 		} else {
