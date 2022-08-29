@@ -4,7 +4,9 @@ import (
 	"Algo/globals"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 type AddStruct struct {
@@ -34,8 +36,16 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
 		if globals.AddProfile(newUser.Userid, newUser.Money, newUser.Strategy) {
-			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user ", newUser.Userid, " was added")
+			w.Header().Set("Content-Type", "application/json")
+			resp := make(map[string]string)
+			resp["message"] = "user " + newUser.Userid + " was added"
+			jsonResp, err := json.Marshal(resp)
+			if err != nil {
+				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+			}
+			w.Write(jsonResp)
+			// fmt.Fprint(w, "message : ")
+			// fmt.Fprint(w, "user ", newUser.Userid, " was added")
 		} else {
 			fmt.Fprint(w, "message : ")
 			fmt.Fprint(w, "user ", newUser.Userid, " was not added, max users added")
@@ -63,10 +73,14 @@ func UpdateToRemoveStatus(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprint(w, "message : User ", removeUser.Userid, " doesnt exist in context")
 		} else {
-
-			fmt.Fprint(w, "message : ")
-			fmt.Fprint(w, "user ", removeUser.Userid, " was updated to rm")
-			fmt.Fprint(w, ", money value is : ", user.Money)
+			w.Header().Set("Content-Type", "application/json")
+			resp := make(map[string]string)
+			resp["message"] = "user " + removeUser.Userid + " was updated to rm" + ", money value is : " + strconv.FormatFloat(user.Money, 'E', -1, 32)
+			jsonResp, err := json.Marshal(resp)
+			if err != nil {
+				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+			}
+			w.Write(jsonResp)
 
 			globals.UpdateStatusToRemove(removeUser.Userid)
 
