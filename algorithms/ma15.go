@@ -35,7 +35,7 @@ const intervallarge = 300
 func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
 
 	// Gets the end value that the back value needs to be greater than
-	fmt.Println("ma15 execute")
+	fmt.Println("[MA15 EXECUTING FOR USER : ", userid, "]")
 
 	isQuit := false
 	t1 := start.Add(time.Second * intervallarge)
@@ -84,13 +84,13 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 			continue
 		}
 
-		// fmt.Println("got price : ", val, " at time : ", time.Now(), " FOR USER [", userid, "]")
+		fmt.Println("got price : ", val, " at time : ", time.Now(), " FOR USER [", userid, "]")
 		fmt.Println()
 
 		price.price = val
 		price.date = time.Now()
 
-		fmt.Println("getting price of : ", price.price, " and size of ll large is ", lLarge.Len())
+		// fmt.Println("getting price of : ", price.price, " and size of ll large is ", lLarge.Len())
 
 		// check if change in price
 		if position.inPosition && position.buy != price.price {

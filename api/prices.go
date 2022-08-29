@@ -19,7 +19,7 @@ type Result struct {
 }
 
 func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
-	fmt.Println("getting prices...")
+	fmt.Println("[GETTING PRICES]")
 	end := start.Add(runningTimeMin * time.Minute)
 	isQuit := false
 	var r Result
