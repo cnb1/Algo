@@ -4,7 +4,6 @@ import (
 	"Algo/globals"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
@@ -12,7 +11,7 @@ import (
 )
 
 type Price struct {
-	Usd int `json:"usd"`
+	Usd float64 `json:"usd"`
 }
 
 type Result struct {
@@ -23,11 +22,10 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 	fmt.Println("getting prices...")
 	end := start.Add(runningTimeMin * time.Minute)
 	isQuit := false
+	var r Result
 
 	for !time.Now().After(end) && !isQuit {
-		// fmt.Println("(Price GR) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 		time.Sleep(4 * time.Second)
-		// fmt.Println("getting prices ....")
 
 		select {
 		case isQuit = <-globals.QuitPrice[userid]:
@@ -48,6 +46,13 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 
 		resp, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
 
+		decodererr := json.NewDecoder(resp.Body).Decode(&r)
+
+		if decodererr != nil {
+			panic(err)
+		}
+
+		// fmt.Println("decoder is ", decoder)
 		if err != nil {
 			log.Fatalln(err)
 			fmt.Println("request error")
@@ -55,7 +60,6 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 			continue
 		}
 		//We Read the response body on the line below.
-		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatalln(err)
 			fmt.Println("request error")
@@ -63,15 +67,15 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 			continue
 		}
 
-		var result Result
-		json.Unmarshal(body, &result)
+		if decodererr != nil {
+			fmt.Println("Decoder error")
+			time.Sleep(5 * time.Second)
+			continue
+		}
 
-		fmt.Println()
-		fmt.Println("sending price : ", result.Crypto.Usd, " at time : ", time.Now(), " FOR USER [", userid, "]")
+		fmt.Println("sending price : ", r.Crypto.Usd, " at time : ", time.Now(), " FOR USER [", userid, "]")
 
-		// If we can recieve on the channel then it is NOT closed
-
-		globals.Prices[userid] <- (float64(result.Crypto.Usd))
+		globals.Prices[userid] <- (float64(r.Crypto.Usd))
 	}
 
 }
