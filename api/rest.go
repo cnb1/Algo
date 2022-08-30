@@ -42,12 +42,25 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// check if user already exists
+	_, errUsr := globals.GetUser(newUser.Userid)
+
+	if errUsr == nil {
+		w.Header().Set("Content-Type", "application/json")
+		resptemp := Response{"User [" + newUser.Userid + "] is already trading"}
+		json.NewEncoder(w).Encode(resptemp)
+		return
+	}
+
 	switch r.Method {
 	case "POST":
 		// w.WriteHeader(http.StatusCreated)
 		if globals.AddProfile(newUser.Userid, newUser.Money, newUser.Strategy) {
+			fmt.Println("Added Profile for {user: ", newUser.Userid, " strategy: ", newUser.Strategy,
+				" money to trade: ", newUser.Money, "}")
 			w.Header().Set("Content-Type", "application/json")
-			resptemp := Response{"user " + newUser.Userid + " was added"}
+			resptemp := Response{"User [" + newUser.Userid + "] was added"}
 			json.NewEncoder(w).Encode(resptemp)
 		} else {
 			fmt.Fprint(w, "message : ")

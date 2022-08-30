@@ -37,8 +37,6 @@ func GetPrice(wg *sync.WaitGroup) {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
 
-	fmt.Println("url:", payload.Url)
-
 	fmt.Println("[GETTING PRICES]")
 	isQuit := false
 	var r Result
