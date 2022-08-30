@@ -25,8 +25,8 @@ func ReadProfiles() {
 		} else if isOne && globals.ProfilesToRun.Users.Len() <= 0 {
 			isOne = false
 			// close prices thread by sending a quit is true channel
+			fmt.Println("[Closing prices]")
 			globals.QuitPrice <- true
-			time.Sleep(2 * time.Second)
 		}
 
 		time.Sleep(5 * time.Second)
