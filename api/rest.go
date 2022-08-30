@@ -28,52 +28,27 @@ type Response struct {
 }
 
 func AddUser(w http.ResponseWriter, r *http.Request) {
-	var newUser AddStruct
-	fmt.Println("1")
 
-	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
+	setupResponse(&w, r)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
+
+	var newUser AddStruct
+
 	err := json.NewDecoder(r.Body).Decode(&newUser)
-	fmt.Println(newUser)
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Println("2")
 	switch r.Method {
 	case "POST":
-		w.WriteHeader(http.StatusCreated)
-		fmt.Println("3")
+		// w.WriteHeader(http.StatusCreated)
 		if globals.AddProfile(newUser.Userid, newUser.Money, newUser.Strategy) {
-			fmt.Println("4")
-			// w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "POST,GET,OPTIONS,DELETE,PUT")
-			fmt.Println("5")
-			// resp := make(map[string]string)
-			// resp["message"] = "user " + newUser.Userid + " was added"
-			// jsonResp, err := json.Marshal(&resp)
-			if err != nil {
-				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
-			}
-			in := []byte(`{"id":1,"name":"test","context":{"key1":"value1","key2":2}}`)
-			fmt.Println("6")
-			w.Write(in)
-			fmt.Println(w.Header())
-			fmt.Println(w)
-			// fmt.Println(jsonResp)
-			return
-			// var resptemp Response
-			// errMar := json.Unmarshal(jsonResp, &resptemp)
-
-			// if errMar != nil {
-			// 	fmt.Println("error in unmarshalling")
-			// }
-
-			// fmt.Println(resptemp)
-			// fmt.Fprint(w, "message : ")
-			// fmt.Fprint(w, "user ", newUser.Userid, " was added")
+			w.Header().Set("Content-Type", "application/json")
+			resptemp := Response{"user " + newUser.Userid + " was added"}
+			json.NewEncoder(w).Encode(resptemp)
 		} else {
 			fmt.Fprint(w, "message : ")
 			fmt.Fprint(w, "user ", newUser.Userid, " was not added, max users added")
@@ -154,4 +129,10 @@ func KillProgram(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))
 	}
+}
+
+func setupResponse(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }

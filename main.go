@@ -15,5 +15,5 @@ func main() {
 	http.HandleFunc("/stop", api.UpdateToRemoveStatus)
 	http.HandleFunc("/money", api.GetMoneyForUser)
 	http.HandleFunc("/kill", api.KillProgram)
-	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
+	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
