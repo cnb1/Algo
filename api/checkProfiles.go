@@ -4,6 +4,7 @@ import (
 	"Algo/globals"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -11,17 +12,28 @@ const runningTimeMin = 180
 
 func ReadProfiles() {
 
-	// TODO need to add logic for killing program
-	// add logic to remove user when prompted from rest to stop
-	//	the trading when removed
-
-	// var wg sync.WaitGroup
+	isOne := false
 
 	for !globals.QuitProgram {
+
+		if !isOne && globals.ProfilesToRun.Users.Len() > 0 {
+			isOne = true
+			// kick off prices
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go GetPrice(&wg)
+		} else if isOne && globals.ProfilesToRun.Users.Len() <= 0 {
+			isOne = false
+			// close prices thread by sending a quit is true channel
+			globals.QuitPrice <- true
+			time.Sleep(2 * time.Second)
+		}
+
 		time.Sleep(5 * time.Second)
 		fmt.Println("")
 		fmt.Print("-> Users trading : ")
 		for e := globals.ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+
 			userTemp := globals.User(e.Value.(globals.User))
 
 			if userTemp.Status == "rm" {

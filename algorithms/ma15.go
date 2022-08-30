@@ -79,7 +79,6 @@ func Ma15(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, use
 		case <-time.After(time.Second * 10):
 			fmt.Println("Timeout")
 			wg.Done()
-			globals.QuitPrice[userid] <- true
 			isQuit = true
 			continue
 		}

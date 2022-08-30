@@ -23,7 +23,7 @@ type PriceAPI struct {
 	Url string `json:"url"`
 }
 
-func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
+func GetPrice(wg *sync.WaitGroup) {
 
 	content, err := ioutil.ReadFile("./config.json")
 	if err != nil {
@@ -40,28 +40,21 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 	fmt.Println("url:", payload.Url)
 
 	fmt.Println("[GETTING PRICES]")
-	end := start.Add(runningTimeMin * time.Minute)
 	isQuit := false
 	var r Result
 
-	for !time.Now().After(end) && !isQuit {
+	for !isQuit {
 		time.Sleep(4 * time.Second)
 
 		select {
-		case isQuit = <-globals.QuitPrice[userid]:
-			fmt.Println("is going to quit prices : ", isQuit)
+		case isQuit = <-globals.QuitPrice:
+			fmt.Println("[Is going to quit prices] : ", isQuit)
 			if isQuit {
 				fmt.Println("After print wg done")
 				wg.Done()
 				return
 			}
 		default:
-		}
-
-		if time.Now().After(end) {
-			fmt.Println("stopping prices...")
-			wg.Done()
-			fmt.Println("After prices wg done")
 		}
 
 		resp, err := http.Get(payload.Url)
@@ -93,9 +86,16 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 			continue
 		}
 
-		fmt.Println("sending price : ", r.Crypto.Usd, " at time : ", time.Now(), " FOR USER [", userid, "]")
+		priceToSend := (float64(r.Crypto.Usd))
 
-		globals.Prices[userid] <- (float64(r.Crypto.Usd))
+		// for loop through the users
+		for e := globals.ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
+			userTemp := globals.User(e.Value.(globals.User))
+			fmt.Println("sending price : ", r.Crypto.Usd, " at time : ", time.Now(), " FOR USER [", userTemp.Userid, "]")
+			globals.Prices[userTemp.Userid] <- priceToSend
+
+		}
+
 	}
 
 }

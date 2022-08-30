@@ -22,7 +22,7 @@ type User struct {
 	Status   string
 }
 
-var QuitPrice = make(map[string](chan bool))
+var QuitPrice = make(chan bool)
 var QuitAlgo = make(map[string](chan bool))
 var Prices = make(map[string](chan float64))
 var Money = make(map[string]float64)
