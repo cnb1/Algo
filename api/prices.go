@@ -4,6 +4,7 @@ import (
 	"Algo/globals"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
@@ -18,7 +19,26 @@ type Result struct {
 	Crypto Price `json:"bitcoin"`
 }
 
+type PriceAPI struct {
+	Url string `json:"url"`
+}
+
 func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration, userid string) {
+
+	content, err := ioutil.ReadFile("./config.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	// Now let's unmarshall the data into `payload`
+	var payload PriceAPI
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		log.Fatal("Error during Unmarshal(): ", err)
+	}
+
+	fmt.Println("url:", payload.Url)
+
 	fmt.Println("[GETTING PRICES]")
 	end := start.Add(runningTimeMin * time.Minute)
 	isQuit := false
@@ -44,7 +64,7 @@ func GetPrice(start time.Time, wg *sync.WaitGroup, runningTimeMin time.Duration,
 			fmt.Println("After prices wg done")
 		}
 
-		resp, err := http.Get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
+		resp, err := http.Get(payload.Url)
 
 		decodererr := json.NewDecoder(resp.Body).Decode(&r)
 
