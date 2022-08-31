@@ -85,14 +85,18 @@ func UpdateToRemoveStatus(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		w.WriteHeader(http.StatusCreated)
-		user, err := globals.GetUser(removeUser.Userid)
+		_, err := globals.GetUser(removeUser.Userid)
 
 		if err != nil {
 			fmt.Fprint(w, "message : User ", removeUser.Userid, " doesnt exist in context")
 		} else {
 			w.Header().Set("Content-Type", "application/json")
 			resp := make(map[string]string)
-			resp["message"] = "user " + removeUser.Userid + " was updated to rm" + ", money value is : " + strconv.FormatFloat(user.Money, 'E', -1, 32)
+
+			profitLoss := CalculatePriceLoss(removeUser.Userid)
+
+			resp["message"] = "user " + removeUser.Userid + " was updated to rm" +
+				", money value is : " + strconv.FormatFloat(profitLoss, 'f', 2, 32)
 			jsonResp, err := json.Marshal(resp)
 			if err != nil {
 				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
@@ -113,6 +117,8 @@ func UpdateToRemoveStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {
+	setupResponse(&w, r)
+
 	var user UserIDStruct
 	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -123,9 +129,23 @@ func GetMoneyForUser(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "POST":
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "Money : ")
-		fmt.Fprint(w, globals.Money[user.Userid])
+		user, err := globals.GetUser(user.Userid)
+
+		if err != nil {
+			fmt.Fprint(w, "message : User ", user.Userid, " doesnt exist in context")
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+
+			resp := make(map[string]string)
+			tempMoney := CalculatePriceLoss(user.Userid)
+			resp["message"] = strconv.FormatFloat(tempMoney, 'f', 2, 32)
+			jsonResp, err := json.Marshal(resp)
+
+			if err != nil {
+				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+			}
+			w.Write(jsonResp)
+		}
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message": "Can't find method requested"}`))

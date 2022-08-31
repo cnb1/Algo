@@ -26,6 +26,7 @@ var QuitPrice = make(chan bool)
 var QuitAlgo = make(map[string](chan bool))
 var Prices = make(map[string](chan float64))
 var Money = make(map[string]float64)
+var MoneyInitial = make(map[string]float64)
 var ProfilesToRun = Profile{}
 var QuitProgram = false
 
@@ -74,6 +75,7 @@ func AddProfile(userid string, money float64, strategy string) bool {
 		profTemp := User{Userid: userid, Money: money, Strategy: strategy,
 			Status: "nt"}
 		ProfilesToRun.Users.PushBack(profTemp)
+		MoneyInitial[userid] = money
 		ret = true
 	} else {
 		ret = false
@@ -91,6 +93,8 @@ func RemoveUser(userid string) bool {
 		if e.Value.(User).Userid == userid {
 			ret = true
 			ProfilesToRun.Users.Remove(e)
+			delete(MoneyInitial, userid)
+			delete(Money, userid)
 		}
 	}
 	ProfilesToRun.mu.Unlock()

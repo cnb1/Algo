@@ -16,6 +16,8 @@ func ReadProfiles() {
 
 	for !globals.QuitProgram {
 
+		time.Sleep(5 * time.Second)
+
 		if !isOne && globals.ProfilesToRun.Users.Len() > 0 {
 			isOne = true
 			// kick off prices
@@ -29,7 +31,6 @@ func ReadProfiles() {
 			globals.QuitPrice <- true
 		}
 
-		time.Sleep(5 * time.Second)
 		fmt.Println("")
 		fmt.Print("-> Users trading : ")
 		for e := globals.ProfilesToRun.Users.Front(); e != nil; e = e.Next() {
@@ -64,7 +65,6 @@ func removeUser(userid string) {
 		fmt.Println(", money value is : ", user.Money)
 
 		globals.RemoveUser(userid)
-
 	}
 
 	// need to check if a user is in the prices channel
@@ -73,4 +73,13 @@ func removeUser(userid string) {
 		Stop(userid)
 	}
 
+}
+
+func CalculatePriceLoss(userid string) float64 {
+	initial := globals.MoneyInitial[userid]
+	current := globals.Money[userid]
+	change := current - initial
+	temp := -15625.15456
+	fmt.Println(change)
+	return current + change + temp
 }
