@@ -73,6 +73,7 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateToRemoveStatus(w http.ResponseWriter, r *http.Request) {
+	setupResponse(&w, r)
 	var removeUser RemoveStruct
 	// fmt.Println("(AA) Number of goroutines : ", runtime.NumGoroutine(), " id ", globals.GetGID())
 	err := json.NewDecoder(r.Body).Decode(&removeUser)
