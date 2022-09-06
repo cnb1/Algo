@@ -25,6 +25,7 @@ type UserIDStruct struct {
 
 type Response struct {
 	Message string `json:"message"`
+	Success bool   `json:"success"`
 }
 
 func AddUser(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +49,8 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 
 	if errUsr == nil {
 		w.Header().Set("Content-Type", "application/json")
-		resptemp := Response{"User [" + newUser.Userid + "] is already trading"}
+		resptemp := Response{Message: "User [" + newUser.Userid + "] is already trading",
+			Success: true}
 		json.NewEncoder(w).Encode(resptemp)
 		return
 	}
@@ -60,8 +62,11 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Added Profile for {user: ", newUser.Userid, " strategy: ", newUser.Strategy,
 				" money to trade: ", newUser.Money, "}")
 			w.Header().Set("Content-Type", "application/json")
-			resptemp := Response{"User [" + newUser.Userid + "] was added"}
-			json.NewEncoder(w).Encode(resptemp)
+
+			resp := make(map[string]Response)
+			resp["message"] = Response{Message: "User [" + newUser.Userid + "] was added",
+				Success: true}
+			json.NewEncoder(w).Encode(resp)
 		} else {
 			fmt.Fprint(w, "message : ")
 			fmt.Fprint(w, "user ", newUser.Userid, " was not added, max users added")
