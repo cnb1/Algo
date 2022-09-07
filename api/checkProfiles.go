@@ -80,5 +80,5 @@ func CalculatePriceLoss(userid string) float64 {
 	current := globals.Money[userid]
 	change := current - initial
 
-	return current + change
+	return change
 }

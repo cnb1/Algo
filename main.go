@@ -2,6 +2,7 @@ package main
 
 import (
 	"Algo/api"
+	"Algo/globals"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 
 func main() {
 	fmt.Println("starting rest client...")
+
+	globals.SetClient()
 
 	go api.ReadProfiles()
 	http.HandleFunc("/start", api.AddUser)

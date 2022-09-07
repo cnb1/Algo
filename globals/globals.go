@@ -3,11 +3,20 @@ package globals
 import (
 	"bytes"
 	"container/list"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Profile struct {
@@ -21,6 +30,9 @@ type User struct {
 	Strategy string
 	Status   string
 }
+type PriceAPI struct {
+	MongoDB string `json:"mongoDB"`
+}
 
 var QuitPrice = make(chan bool)
 var QuitAlgo = make(map[string](chan bool))
@@ -29,8 +41,51 @@ var Money = make(map[string]float64)
 var MoneyInitial = make(map[string]float64)
 var ProfilesToRun = Profile{}
 var QuitProgram = false
+var Mongo mongo.Client
+var Context context.Context
 
 const sizeMaxProfiles int = 5
+
+func GetClient() mongo.Client {
+	return Mongo
+}
+
+func GetContext() context.Context {
+	return Context
+}
+
+func SetClient() {
+	fmt.Println("setting client")
+	content, err := ioutil.ReadFile("./config.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var payload PriceAPI
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		log.Fatal("Error during Unmarshal(): ", err)
+	}
+
+	MongoTemp, err := mongo.NewClient(options.Client().ApplyURI(payload.MongoDB))
+	if err != nil {
+		fmt.Println("panic 1")
+		log.Fatal(err)
+	}
+	Mongo = *MongoTemp
+	Context, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = MongoTemp.Connect(Context)
+	if err != nil {
+		fmt.Println("panic 2")
+		log.Fatal(err)
+	}
+	// defer Mongo.Disconnect(Context)
+	err = Mongo.Ping(Context, readpref.Primary())
+	if err != nil {
+		fmt.Println("panic 3")
+		log.Fatal(err)
+	}
+}
 
 func GetGID() uint64 {
 	b := make([]byte, 64)
