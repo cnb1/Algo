@@ -224,7 +224,7 @@ func updateValueAndValueHistory(userJSON UserIDStruct, money float64, pl float64
 	fmt.Println("The prfit loss is .. : ", pl)
 	fmt.Println("Result val is ", result.Value)
 
-	newValue := pl + result.Value - 100000000
+	newValue := pl + result.Value
 
 	updateVal := bson.M{"$set": bson.M{"value": newValue}}
 
